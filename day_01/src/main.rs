@@ -5,7 +5,7 @@ fn main() {
 }
 
 fn part1(input: &str) -> u32 {
-    let parsed: Vec<Vec<u32>> = input
+    input
         .lines()
         .map(|line| {
             line.chars()
@@ -13,13 +13,14 @@ fn part1(input: &str) -> u32 {
                 .map(|d| d.to_digit(10).expect("should only be numbers"))
                 .collect()
         })
-        .collect();
-
-    sum_up_calibration(&parsed)
+        .fold(0, |sum, vec: Vec<u32>| {
+            sum + vec.first().expect("should not be empty!") * 10
+                + vec.last().expect("should not be empty!")
+        })
 }
 
 fn part2(input: &str) -> u32 {
-    let parsed: Vec<Vec<u32>> = input
+    input
         .lines()
         .map(|line| {
             line.replace("one", "o1e")
@@ -36,23 +37,10 @@ fn part2(input: &str) -> u32 {
                 .map(|d| d.to_digit(10).expect("should only be numbers"))
                 .collect()
         })
-        .collect();
-    sum_up_calibration(&parsed)
-}
-
-fn sum_up_calibration(parsed_input: &Vec<Vec<u32>>) -> u32 {
-    parsed_input
-        .iter()
-        .map(|vec| {
-            format!(
-                "{}{}",
-                vec.first().expect("should not be empty!"),
-                vec.last().expect("should not be empty!")
-            )
-            .parse::<u32>()
-            .expect("should only be positive numbers!")
+        .fold(0, |sum, vec: Vec<u32>| {
+            sum + vec.first().expect("should not be empty!") * 10
+                + vec.last().expect("should not be empty!")
         })
-        .sum()
 }
 
 #[test]
