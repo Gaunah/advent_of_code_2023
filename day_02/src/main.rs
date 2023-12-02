@@ -24,32 +24,25 @@ fn part1(input: &str) -> u32 {
     input
         .lines()
         .filter_map(|line| {
-            if let Some(_) = re_red
-                .captures_iter(line)
-                .find(|red_cap| red_cap["red"].parse::<u32>().unwrap() > max_red)
+            if is_any_over_max(&re_red, max_red, line)
+                || is_any_over_max(&re_green, max_green, line)
+                || is_any_over_max(&re_blue, max_blue, line)
             {
-                None // found too many red cubes in one line
-            } else if let Some(_) = re_blue
-                .captures_iter(line)
-                .find(|blue_cap| blue_cap["blue"].parse::<u32>().unwrap() > max_blue)
-            {
-                None // found too many blue cubes in one line
-            } else if let Some(_) = re_green
-                .captures_iter(line)
-                .find(|green_cap| green_cap["green"].parse::<u32>().unwrap() > max_green)
-            {
-                None // found too many green cubes in one line
+                None // found too many cubes of one color in the line
             } else {
                 Some(
-                    re_game
-                        .captures(line)
-                        .expect("Should always contain game ID!")["game_id"]
+                    re_game.captures(line).expect("Should contain game ID!")["game_id"]
                         .parse::<u32>()
-                        .expect("Should always be a positiv number!"),
+                        .expect("Should be a positiv number!"),
                 )
             }
         })
         .sum()
+}
+
+fn is_any_over_max(re: &Regex, max: u32, line: &str) -> bool {
+    re.captures_iter(line)
+        .any(|cap| cap[1].parse::<u32>().expect("Should be a positiv number!") > max)
 }
 
 fn part2(input: &str) -> u32 {
@@ -60,39 +53,24 @@ fn part2(input: &str) -> u32 {
     input
         .lines()
         .map(|line| {
-            let min_red_needed = re_red
-                .captures_iter(line)
-                .map(|cap| {
-                    cap["red"]
-                        .parse::<u32>()
-                        .expect("Should always be a positiv number!")
-                })
-                .max()
-                .expect("Should not be empty!");
-
-            let min_green_needed = re_green
-                .captures_iter(line)
-                .map(|cap| {
-                    cap["green"]
-                        .parse::<u32>()
-                        .expect("Should always be a positiv number!")
-                })
-                .max()
-                .expect("Should not be empty!");
-
-            let min_blue_needed = re_blue
-                .captures_iter(line)
-                .map(|cap| {
-                    cap["blue"]
-                        .parse::<u32>()
-                        .expect("Should always be a positiv number!")
-                })
-                .max()
-                .expect("Should not be empty!");
+            let min_red_needed = extract_max(&re_red, line);
+            let min_green_needed = extract_max(&re_green, line);
+            let min_blue_needed = extract_max(&re_blue, line);
 
             min_red_needed * min_green_needed * min_blue_needed
         })
         .sum()
+}
+
+fn extract_max(re: &Regex, line: &str) -> u32 {
+    re.captures_iter(line)
+        .map(|cap| {
+            cap[1]
+                .parse::<u32>()
+                .expect("Should always be a positiv number!")
+        })
+        .max()
+        .expect("Should not be empty!")
 }
 
 #[cfg(test)]
