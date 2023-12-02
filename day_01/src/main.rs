@@ -5,25 +5,15 @@ fn main() {
 }
 
 fn part1(input: &str) -> u32 {
-    input
-        .lines()
-        .map(|line| {
-            line.chars()
-                .filter(|c| c.is_ascii_digit())
-                .map(|d| d.to_digit(10).expect("should only be numbers"))
-                .collect()
-        })
-        .fold(0, |sum, vec: Vec<u32>| {
-            sum + vec.first().expect("should not be empty!") * 10
-                + vec.last().expect("should not be empty!")
-        })
+    input.lines().map(concat_first_and_last_digit).sum()
 }
 
 fn part2(input: &str) -> u32 {
     input
         .lines()
         .map(|line| {
-            line.replace("one", "o1e")
+            let processed_line = line
+                .replace("one", "o1e")
                 .replace("two", "t2o")
                 .replace("three", "t3e")
                 .replace("four", "f4r")
@@ -31,16 +21,19 @@ fn part2(input: &str) -> u32 {
                 .replace("six", "s6x")
                 .replace("seven", "s7n")
                 .replace("eight", "e8t")
-                .replace("nine", "n9e")
-                .chars()
-                .filter(|c| c.is_ascii_digit())
-                .map(|d| d.to_digit(10).expect("should only be numbers"))
-                .collect()
+                .replace("nine", "n9e");
+            concat_first_and_last_digit(&processed_line)
         })
-        .fold(0, |sum, vec: Vec<u32>| {
-            sum + vec.first().expect("should not be empty!") * 10
-                + vec.last().expect("should not be empty!")
-        })
+        .sum()
+}
+
+fn concat_first_and_last_digit(line: &str) -> u32 {
+    let digits: Vec<u32> = line.chars().filter_map(|c| c.to_digit(10)).collect();
+    if let (Some(first), Some(last)) = (digits.first(), digits.last()) {
+        first * 10 + last
+    } else {
+        0 // should never happen
+    }
 }
 
 #[test]
