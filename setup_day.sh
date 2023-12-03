@@ -18,7 +18,10 @@ NAME=$(printf "day_%02d" "$DAY_NUM")
 if [ -d "$NAME" ]; then
     echo "The project '$NAME' already exists." >&2
 else
-    cargo new --vcs none "$NAME"
+    cargo new --vcs none "${NAME}"
+    if [ -f ./template_main.rs ]; then
+        cp -v ./template_main.rs ./"${NAME}"/src/main.rs
+    fi
 fi
 
 SESSION_COOKIE_FILE="./sessionCookie"
