@@ -43,12 +43,11 @@ fn sum_part_numbers(window: [&str; 3], line_len: usize) -> u32 {
     re.captures_iter(mid)
         .filter_map(|cap| {
             let number = cap.get(0).unwrap();
-            let start = number.start().saturating_sub(1);
-            let end = number.end().saturating_add(1);
-            let clamped_range = start..end.clamp(0, line_len);
-            if contains_symbol(&above[clamped_range.clone()])
-                || contains_symbol(&mid[clamped_range.clone()])
-                || contains_symbol(&below[clamped_range])
+            let start = number.start().saturating_sub(1).clamp(0, line_len);
+            let end = number.end().saturating_add(1).clamp(0, line_len);
+            if contains_symbol(&above[start..end])
+                || contains_symbol(&mid[start..end])
+                || contains_symbol(&below[start..end])
             {
                 Some(cap[0].parse::<u32>().expect("Should be a positiv number!"))
             } else {
@@ -68,13 +67,17 @@ fn sum_gear_ratios(window: [&str; 3], line_len: usize) -> u32 {
     let re = Regex::new(r"(\d+)").expect("Should be valid regex!");
     let [above, mid, below] = window;
 
+    let gear_numbers: Vec<_> = re
+        .captures_iter(above)
+        .chain(re.captures_iter(mid))
+        .chain(re.captures_iter(below))
+        .map(|cap| cap.get(0).unwrap())
+        .collect();
+
     mid.match_indices('*')
         .filter_map(|(i, _)| {
-            let gear_numbers: Vec<u32> = re
-                .captures_iter(above)
-                .chain(re.captures_iter(mid))
-                .chain(re.captures_iter(below))
-                .map(|cap| cap.get(0).unwrap())
+            let connected_numbers: Vec<u32> = gear_numbers
+                .iter()
                 .filter_map(|number| {
                     let start = number.start().saturating_sub(1);
                     let end = number.end().saturating_add(1);
@@ -91,8 +94,8 @@ fn sum_gear_ratios(window: [&str; 3], line_len: usize) -> u32 {
                     }
                 })
                 .collect();
-            if gear_numbers.len() == 2 {
-                Some(gear_numbers.first().unwrap() * gear_numbers.last().unwrap())
+            if connected_numbers.len() == 2 {
+                Some(connected_numbers[0] * connected_numbers[1])
             } else {
                 None
             }
