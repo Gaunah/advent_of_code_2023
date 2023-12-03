@@ -9,14 +9,14 @@ fn main() {
 }
 
 fn part1(input: &str) -> u32 {
-    process_input_window(input, sum_part_numbers)
+    parse_input(input, sum_part_numbers)
 }
 
 fn part2(input: &str) -> u32 {
-    process_input_window(input, sum_gear_ratios)
+    parse_input(input, sum_gear_ratios)
 }
 
-fn process_input_window<F>(input: &str, process_window_fn: F) -> u32
+fn parse_input<F>(input: &str, process_window_fn: F) -> u32
 where
     F: Fn([&str; 3], usize) -> u32,
 {
