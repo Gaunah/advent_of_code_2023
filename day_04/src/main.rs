@@ -8,22 +8,23 @@ fn main() {
 
 fn slice_to_hashset(slice: &str) -> HashSet<u32> {
     slice
-        .split(' ')
+        .split_whitespace()
         .filter_map(|part| part.parse::<u32>().ok())
         .collect()
+}
+
+fn parse_line(line: &str) -> (HashSet<u32>, HashSet<u32>) {
+    let (_, line) = line.split_once(": ").unwrap();
+    let (win_line, my_line) = line.split_once("|").unwrap();
+    (slice_to_hashset(win_line), slice_to_hashset(my_line))
 }
 
 fn part1(input: &str) -> u32 {
     input
         .lines()
         .map(|line| {
-            let (_, line) = line.split_once(": ").unwrap();
-            let (win_line, my_line) = line.split_once("|").unwrap();
-
-            let number_of_matches = slice_to_hashset(win_line)
-                .intersection(&slice_to_hashset(my_line))
-                .count();
-
+            let (win_set, my_set) = parse_line(line);
+            let number_of_matches = win_set.intersection(&my_set).count();
             if number_of_matches > 0 {
                 2u32.pow((number_of_matches - 1) as u32)
             } else {
@@ -34,7 +35,21 @@ fn part1(input: &str) -> u32 {
 }
 
 fn part2(input: &str) -> u32 {
-    0
+    let mut stash: Vec<u32> = vec![1; input.lines().count()];
+
+    for (index, line) in input.lines().enumerate() {
+        let (win_set, my_set) = parse_line(line);
+        let number_of_matches = win_set.intersection(&my_set).count();
+
+        let start = index + 1;
+        let end = std::cmp::min(start + number_of_matches, stash.len());
+
+        for i in start..end {
+            stash[i] += stash[index]
+        }
+    }
+
+    stash.iter().sum()
 }
 
 #[cfg(test)]
