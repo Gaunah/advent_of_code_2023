@@ -1,3 +1,5 @@
+use std::{cmp, sync::Arc, thread};
+
 fn main() {
     let input = include_str!("../input.txt");
     println!("Answer part1: {}", part1(input));
@@ -27,20 +29,43 @@ fn part1(input: &str) -> i64 {
 
 fn part2(input: &str) -> i64 {
     let (seed_line, maps) = parse_input(input);
+    let maps_arc = Arc::new(maps);
 
-    let mut min_location = i64::MAX;
+    let mut handles = vec![];
+    let max_subrange_size = 10000000; // better not decrease this
+
     for chunk in seed_line.chunks_exact(2) {
         match chunk {
             [start, range] => {
-                for seed in *start..*start + range {
-                    min_location = std::cmp::min(get_location(seed, &maps), min_location);
+                let total_range = *start..*start + *range;
+                for subrange in total_range.clone().step_by(max_subrange_size) {
+                    let subrange_end =
+                        cmp::min(subrange + max_subrange_size as i64, total_range.end);
+                    let maps_clone = maps_arc.clone();
+
+                    // Spawn a thread for each subrange
+                    let handle = thread::spawn(move || {
+                        let mut min_location = i64::MAX;
+                        for seed in subrange..subrange_end {
+                            min_location = cmp::min(get_location(seed, &maps_clone), min_location);
+                        }
+                        min_location
+                    });
+                    handles.push(handle);
                 }
             }
             _ => continue, // should never happen
         }
     }
 
-    min_location
+    // Collect results from each thread and find the overall minimum
+    let mut global_min = i64::MAX;
+    for handle in handles {
+        let local_min = handle.join().unwrap();
+        global_min = cmp::min(local_min, global_min);
+    }
+
+    global_min
 }
 
 fn block_to_vec(block: &&str) -> Vec<i64> {
@@ -50,7 +75,7 @@ fn block_to_vec(block: &&str) -> Vec<i64> {
         .collect()
 }
 
-fn get_location(seed: i64, maps: &[Vec<i64>]) -> i64 {
+fn get_location(seed: i64, maps: &Vec<Vec<i64>>) -> i64 {
     let mut current = seed;
 
     for map in maps {
