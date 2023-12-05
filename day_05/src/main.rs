@@ -1,50 +1,73 @@
 fn main() {
     let input = include_str!("../input.txt");
     println!("Answer part1: {}", part1(input));
-    // println!("Answer part2: {}", part2(input));
+    println!("Answer part2: {}", part2(input));
+}
+
+fn parse_input(input: &str) -> (Vec<i64>, Vec<Vec<i64>>) {
+    let blocks: Vec<&str> = input.split("\n\n").collect();
+    let maps: Vec<Vec<i64>> = blocks[1..]
+        .iter()
+        .map(|&block| block_to_vec(&block))
+        .collect();
+    let seed_line = block_to_vec(&blocks[0]);
+
+    (seed_line, maps)
 }
 
 fn part1(input: &str) -> i64 {
-    let mut blocks = input.split("\n\n");
-    // first block contains the seeds
-    // every following block contains a map x => y
-    let seeds = block_to_vec(blocks.next().unwrap());
-    let maps: Vec<Vec<i64>> = blocks.map(|block| block_to_vec(block)).collect();
+    let (seed_line, maps) = parse_input(input);
 
-    seeds
+    seed_line
         .iter()
-        .map(|seed| {
-            let mut out = *seed;
-
-            for map in &maps {
-                for chunk in map.chunks_exact(3) {
-                    let [dst_start, src_start, range] = chunk else {
-                        panic!("Chunk has less than 3 elements!");
-                    };
-
-                    if (src_start..&(src_start + range)).contains(&&out) {
-                        // translate to next category
-                        out += *dst_start - *src_start;
-                        break;
-                    }
-                }
-            }
-            out
-        })
+        .map(|seed| get_location(*seed, &maps))
         .min()
-        .expect("Should not be empty!")
+        .unwrap()
 }
 
-fn block_to_vec(block: &str) -> Vec<i64> {
+fn part2(input: &str) -> i64 {
+    let (seed_line, maps) = parse_input(input);
+
+    let mut min_location = i64::MAX;
+    for chunk in seed_line.chunks_exact(2) {
+        match chunk {
+            [start, range] => {
+                for seed in *start..*start + range {
+                    min_location = std::cmp::min(get_location(seed, &maps), min_location);
+                }
+            }
+            _ => continue, // should never happen
+        }
+    }
+
+    min_location
+}
+
+fn block_to_vec(block: &&str) -> Vec<i64> {
     block
         .split_whitespace()
-        .filter_map(|part| part.parse::<i64>().ok())
+        .filter_map(|part| part.parse().ok())
         .collect()
 }
 
-// fn part2(input: &str) -> u32 {
-//     0
-// }
+fn get_location(seed: i64, maps: &[Vec<i64>]) -> i64 {
+    let mut current = seed;
+
+    for map in maps {
+        for chunk in map.chunks_exact(3) {
+            let [dst_start, src_start, range] = chunk else {
+                continue; // should never happen
+            };
+
+            if (src_start..&(src_start + range)).contains(&&current) {
+                // translate to next category
+                current += *dst_start - *src_start;
+                break;
+            }
+        }
+    }
+    current
+}
 
 #[cfg(test)]
 mod test {
@@ -89,8 +112,8 @@ humidity-to-location map:
         assert_eq!(part1(TEST_INPUT), 35);
     }
 
-    // #[test]
-    // fn case2() {
-    //     assert_eq!(part2(TEST_INPUT), 0);
-    // }
+    #[test]
+    fn case2() {
+        assert_eq!(part2(TEST_INPUT), 46);
+    }
 }
