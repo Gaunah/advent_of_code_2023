@@ -2,8 +2,9 @@ use std::{cmp, sync::Arc, thread};
 
 fn main() {
     let input = include_str!("../input.txt");
-    println!("Answer part1: {}", part1(input));
-    println!("Answer part2: {}", part2(input));
+
+    println!("Answer part1: {}", part1(&input));
+    println!("Answer part2: {}", part2(&input));
 }
 
 fn parse_input(input: &str) -> (Vec<i64>, Vec<Vec<i64>>) {
@@ -32,7 +33,9 @@ fn part2(input: &str) -> i64 {
     let maps_arc = Arc::new(maps);
 
     let mut handles = vec![];
-    let max_subrange_size = 10000000; // better not decrease this
+
+    let max_threads = 8;
+    let max_subrange_size = (sum_every_second_element(&seed_line) / max_threads) as usize;
 
     for chunk in seed_line.chunks_exact(2) {
         match chunk {
@@ -66,6 +69,13 @@ fn part2(input: &str) -> i64 {
     }
 
     global_min
+}
+
+fn sum_every_second_element(vec: &[i64]) -> i64 {
+    vec.iter()
+        .enumerate()
+        .filter_map(|(index, &value)| if index % 2 == 1 { Some(value) } else { None })
+        .sum()
 }
 
 fn block_to_vec(block: &&str) -> Vec<i64> {
