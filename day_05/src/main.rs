@@ -1,7 +1,7 @@
 use std::{cmp, sync::Arc, thread};
 
 fn main() {
-    let input = include_str!("../input.txt");
+    let input = include_str!("../input.txt").replace("\r\n", "\n");
 
     println!("Answer part1: {}", part1(&input));
     println!("Answer part2: {}", part2(&input));
