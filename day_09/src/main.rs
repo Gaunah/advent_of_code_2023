@@ -1,17 +1,22 @@
 fn main() {
     let input = include_str!("../input.txt");
-    println!("Answer part1: {}", part1(input));
-    // println!("Answer part2: {}", part2(input));
+    println!("Answer process_input: {}", process_input(input, false));
+    println!("Answer process_input: {}", process_input(input, true));
 }
 
-fn part1(input: &str) -> i32 {
+fn process_input(input: &str, reverse: bool) -> i32 {
     input
         .lines()
         .map(|line| {
-            let data = line
+            let mut data = line
                 .split_whitespace()
                 .filter_map(|parts| parts.parse().ok())
                 .collect::<Vec<i32>>();
+
+            if reverse {
+                data.reverse();
+            }
+
             data.last().expect("Should not be empty!") + predict_next_val(&data)
         })
         .sum()
@@ -30,10 +35,6 @@ fn predict_next_val(data: &[i32]) -> i32 {
     diffs.last().expect("Should not be empty!") + predict_next_val(&diffs)
 }
 
-// fn part2(input: &str) -> u32 {
-//     0
-// }
-
 #[cfg(test)]
 mod test {
     use super::*;
@@ -44,11 +45,11 @@ mod test {
 
     #[test]
     fn case1() {
-        assert_eq!(part1(TEST_INPUT), 114);
+        assert_eq!(process_input(TEST_INPUT, false), 114);
     }
 
-    // #[test]
-    // fn case2() {
-    //     assert_eq!(part2(TEST_INPUT), 0);
-    // }
+    #[test]
+    fn case2() {
+        assert_eq!(process_input(TEST_INPUT, true), 2);
+    }
 }
