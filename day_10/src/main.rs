@@ -13,19 +13,52 @@ enum Direction {
 }
 
 fn part1(input: &str) -> u32 {
-    let matrix: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
+    let (_, step_count) = process_maze(input);
+    step_count / 2
+}
+
+fn part2(input: &str) -> u32 {
+    let (maze, _) = process_maze(input);
+
+    let mut ray_count = 0;
+    let mut inside_tile_count = 0;
+    for line in &maze {
+        for ch in line {
+            match ch {
+                'X' => ray_count += 1,
+                '=' => continue,
+                _ => {
+                    if ray_count % 2 == 1 {
+                        inside_tile_count += 1;
+                    }
+                }
+            }
+        }
+        ray_count = 0;
+    }
+
+    inside_tile_count
+}
+
+fn process_maze(input: &str) -> (Vec<Vec<char>>, u32) {
+    let mut matrix: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
 
     let mut current_coord = find_start_coord(&matrix).expect("Should contain start!");
-    let mut next_direction = Some(Direction::East); // Assumed first step East is valid
-    let mut steps = 0;
+    let mut next_direction = Some(Direction::South); // Assumed first step South is valid
 
+    let mut step_count = 0;
     // loops until we hit 'S'
     while let Some(dir) = next_direction {
         current_coord = update_coord(current_coord, dir);
         next_direction = get_next_direction(&matrix, current_coord, dir);
-        steps += 1;
+        matrix[current_coord.0][current_coord.1] = match matrix[current_coord.0][current_coord.1] {
+            'L' | 'J' | '-' => '=',
+            _ => 'X',
+        };
+        step_count += 1;
     }
-    steps / 2
+
+    (matrix, step_count)
 }
 
 fn update_coord((row, col): (usize, usize), direction: Direction) -> (usize, usize) {
@@ -73,10 +106,6 @@ fn get_next_direction(
         ('S', _) => None,
         other => panic!("Invalid combination! {:?}", other),
     }
-}
-
-fn part2(input: &str) -> u32 {
-    0
 }
 
 #[cfg(test)]
