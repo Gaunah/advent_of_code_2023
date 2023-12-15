@@ -1,7 +1,7 @@
 fn main() {
     let input = include_str!("../input.txt");
     println!("Answer part1: {}", part1(input));
-    // println!("Answer part2: {}", part2(input));
+    println!("Answer part2: {}", part2(input));
 }
 
 #[derive(Debug, Clone)]
@@ -16,8 +16,17 @@ impl Coordinate {
     }
 }
 
+fn part2(input: &str) -> usize {
+    let universe = read_and_expand_universe(input, 1000000);
+    sum_distance_of_galaxies(&universe)
+}
+
 fn part1(input: &str) -> usize {
-    let universe = read_and_expand_universe(input);
+    let universe = read_and_expand_universe(input, 1);
+    sum_distance_of_galaxies(&universe)
+}
+
+fn sum_distance_of_galaxies(universe: &[Vec<char>]) -> usize {
     let galaxies = find_all_galaxies(&universe);
 
     let mut dist_sum = 0;
@@ -45,14 +54,16 @@ fn find_all_galaxies(universe: &[Vec<char>]) -> Vec<Coordinate> {
     coords
 }
 
-fn read_and_expand_universe(input: &str) -> Vec<Vec<char>> {
+fn read_and_expand_universe(input: &str, expand_factor: u32) -> Vec<Vec<char>> {
     let mut vertical_expaned: Vec<Vec<char>> = vec![];
     vertical_expaned.reserve(140);
 
     for line in input.lines() {
         vertical_expaned.push(line.chars().collect());
         if line.chars().all(|ch| ch == '.') {
-            vertical_expaned.push(line.chars().collect());
+            for _ in 0..expand_factor {
+                vertical_expaned.push(line.chars().collect());
+            }
         }
     }
 
@@ -64,7 +75,9 @@ fn read_and_expand_universe(input: &str) -> Vec<Vec<char>> {
     for line in transposed.iter() {
         universe_t.push(line.to_vec());
         if line.iter().all(|&ch| ch == '.') {
-            universe_t.push(line.to_vec());
+            for _ in 0..expand_factor {
+                universe_t.push(line.to_vec());
+            }
         }
     }
 
@@ -82,10 +95,6 @@ fn transpose(matrix: &[Vec<char>]) -> Vec<Vec<char>> {
     transposed
 }
 
-// fn part2(input: &str) -> u32 {
-//     0
-// }
-
 #[cfg(test)]
 mod test {
     use super::*;
@@ -102,7 +111,7 @@ mod test {
 #...#.....";
 
     #[test]
-    fn case1() {
+    fn case1_1() {
         assert_eq!(part1(TEST_INPUT), 374);
     }
 
@@ -121,15 +130,23 @@ mod test {
 .........#...
 #....#.......";
         let mut string = String::new();
-        for line in read_and_expand_universe(TEST_INPUT).iter() {
+        for line in read_and_expand_universe(TEST_INPUT, 1).iter() {
             let row: String = line.iter().collect();
             string.push_str(&row);
             string.push('\n');
         }
         assert_eq!(string.trim_end(), output);
     }
-    // #[test]
-    // fn case2() {
-    //     assert_eq!(part2(TEST_INPUT), 0);
-    // }
+
+    #[test]
+    fn case2_1() {
+        let universe = read_and_expand_universe(TEST_INPUT, 9);
+        assert_eq!(sum_distance_of_galaxies(&universe), 1030);
+    }
+
+    #[test]
+    fn case2_2() {
+        let universe = read_and_expand_universe(TEST_INPUT, 99);
+        assert_eq!(sum_distance_of_galaxies(&universe), 8410);
+    }
 }
