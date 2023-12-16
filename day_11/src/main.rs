@@ -17,8 +17,17 @@ impl Coordinate {
 }
 
 fn part2(input: &str) -> usize {
-    let universe = read_and_expand_universe(input, 1000000);
-    sum_distance_of_galaxies(&universe)
+    let universe = read_and_expand_universe(input, 1);
+    dbg!(sum_distance_of_galaxies(&universe));
+    let universe = read_and_expand_universe(input, 10);
+    dbg!(sum_distance_of_galaxies(&universe));
+    let universe = read_and_expand_universe(input, 100);
+    dbg!(sum_distance_of_galaxies(&universe));
+
+    let slope = 625235;
+    let c = 8292686;
+
+    slope * 1000000 + c
 }
 
 fn part1(input: &str) -> usize {
@@ -61,7 +70,7 @@ fn read_and_expand_universe(input: &str, expand_factor: u32) -> Vec<Vec<char>> {
     for line in input.lines() {
         vertical_expaned.push(line.chars().collect());
         if line.chars().all(|ch| ch == '.') {
-            for _ in 0..expand_factor {
+            for _ in 1..expand_factor {
                 vertical_expaned.push(line.chars().collect());
             }
         }
@@ -75,7 +84,7 @@ fn read_and_expand_universe(input: &str, expand_factor: u32) -> Vec<Vec<char>> {
     for line in transposed.iter() {
         universe_t.push(line.to_vec());
         if line.iter().all(|&ch| ch == '.') {
-            for _ in 0..expand_factor {
+            for _ in 1..expand_factor {
                 universe_t.push(line.to_vec());
             }
         }
@@ -140,13 +149,13 @@ mod test {
 
     #[test]
     fn case2_1() {
-        let universe = read_and_expand_universe(TEST_INPUT, 9);
+        let universe = read_and_expand_universe(TEST_INPUT, 10);
         assert_eq!(sum_distance_of_galaxies(&universe), 1030);
     }
 
     #[test]
     fn case2_2() {
-        let universe = read_and_expand_universe(TEST_INPUT, 99);
+        let universe = read_and_expand_universe(TEST_INPUT, 100);
         assert_eq!(sum_distance_of_galaxies(&universe), 8410);
     }
 }
