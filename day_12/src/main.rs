@@ -1,3 +1,5 @@
+use rayon::prelude::*;
+
 fn main() {
     let input = include_str!("../input.txt");
     println!("Answer part1: {}", part1(input));
@@ -5,42 +7,36 @@ fn main() {
 }
 
 fn part1(input: &str) -> usize {
-    let mut sum = 0;
-    for line in input.lines() {
-        let (spring, config) = line.split_once(' ').unwrap();
-        let config: Vec<u8> = config.split(',').map(|num| num.parse().unwrap()).collect();
-        sum += num_of_fitting_variations(spring, &config);
-    }
-    sum
+    input
+        .par_lines()
+        .map(|line| {
+            let (spring, config) = line.split_once(' ').unwrap();
+            let config: Vec<u8> = config.split(',').map(|num| num.parse().unwrap()).collect();
+            num_of_fitting_variations(spring, &config)
+        })
+        .sum()
 }
 
 fn part2(input: &str) -> usize {
-    let mut sum = 0;
-    for line in input.lines() {
-        let (spring_floded, config_folded) = line.split_once(' ').unwrap();
-        let mut config_folded: Vec<u8> = config_folded
-            .split(',')
-            .map(|num| num.parse().unwrap())
-            .collect();
+    input
+        .par_lines()
+        .map(|line| {
+            let (spring_floded, config_folded) = line.split_once(' ').unwrap();
+            let mut config_folded: Vec<u8> = config_folded
+                .split(',')
+                .map(|num| num.parse().unwrap())
+                .collect();
 
-        let mut spring: String = String::new();
-        let mut config: Vec<u8> = vec![];
-        for _ in 0..5 {
-            spring += spring_floded;
-            config.append(&mut config_folded);
-        }
+            let mut spring: String = String::new();
+            let mut config: Vec<u8> = vec![];
+            for _ in 0..5 {
+                spring += spring_floded;
+                config.append(&mut config_folded);
+            }
 
-        sum += num_of_fitting_variations(&spring, &config);
-    }
-
-    sum
-}
-
-fn num_of_fitting_variations(unknown_spring: &str, config: &[u8]) -> usize {
-    generate_variations(unknown_spring)
-        .iter()
-        .filter(|var| spring_fits_config(var, config))
-        .count()
+            num_of_fitting_variations(&spring, &config)
+        })
+        .sum()
 }
 
 fn spring_fits_config(spring: &str, config: &[u8]) -> bool {
@@ -55,23 +51,27 @@ fn spring_fits_config(spring: &str, config: &[u8]) -> bool {
         .all(|(part, &num)| part.len() == num as usize)
 }
 
-fn generate_variations(base: &str) -> Vec<String> {
-    fn recurse(s: &str, current: &str, variations: &mut Vec<String>) {
+fn num_of_fitting_variations(base: &str, config: &[u8]) -> usize {
+    fn recurse(s: &str, current: &str, count: &mut usize, config: &[u8]) {
         match s.find('?') {
             Some(index) => {
                 let (left, right) = s.split_at(index);
                 let right = &right[1..]; // Skip the '?'
 
-                recurse(right, &format!("{}{}.", current, left), variations);
-                recurse(right, &format!("{}{}#", current, left), variations);
+                recurse(right, &format!("{}{}.", current, left), count, config);
+                recurse(right, &format!("{}{}#", current, left), count, config);
             }
-            None => variations.push(format!("{}{}", current, s)),
+            None => {
+                if spring_fits_config(&format!("{}{}", current, s), config) {
+                    *count += 1;
+                }
+            }
         }
     }
 
-    let mut variations = Vec::new();
-    recurse(base, "", &mut variations);
-    variations
+    let mut count = 0;
+    recurse(base, "", &mut count, config);
+    count
 }
 
 #[cfg(test)]
