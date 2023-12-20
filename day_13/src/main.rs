@@ -1,7 +1,7 @@
 fn main() {
     let input = include_str!("../input.txt").replace("\r\n", "\n\n");
-    println!("Answer part1: {}", part1(&input));
-    // println!("Answer part2: {}", part2(input));
+    println!("Answer part1: {}", part1(&input, 0));
+    println!("Answer part2: {}", part1(&input, 1));
 }
 
 fn parse_input(input: &str) -> Vec<Vec<Vec<char>>> {
@@ -31,14 +31,17 @@ fn print_map(map: &[Vec<char>]) {
     }
 }
 
-fn part1(input: &str) -> usize {
+fn part1(input: &str, errors_needed: u32) -> usize {
     let out = parse_input(input);
 
     out.iter()
         .map(|block| {
             //find splitting row
-            let row = find_mirror_pos(&block);
-            let col = find_mirror_pos(&transpose(&block));
+            let row = find_mirror_pos(&block, errors_needed);
+            let mut col = None;
+            if let None = row {
+                col = find_mirror_pos(&transpose(&block), errors_needed);
+            }
 
             match (row, col) {
                 (None, Some(val)) => val,
@@ -52,7 +55,7 @@ fn part1(input: &str) -> usize {
         .sum()
 }
 
-fn find_mirror_pos(map: &[Vec<char>]) -> Option<usize> {
+fn find_mirror_pos(map: &[Vec<char>], errors_needed: u32) -> Option<usize> {
     let len = map.len();
     let mut out = None;
 
@@ -70,7 +73,7 @@ fn find_mirror_pos(map: &[Vec<char>]) -> Option<usize> {
             first.truncate(min_len);
         }
 
-        if first == second {
+        if are_blocks_equal(&first, &second, errors_needed) {
             out = Some(i);
             break;
         }
@@ -79,9 +82,18 @@ fn find_mirror_pos(map: &[Vec<char>]) -> Option<usize> {
     out
 }
 
-// fn part2(input: &str) -> u32 {
-//     0
-// }
+fn are_blocks_equal(first: &[Vec<char>], second: &[Vec<char>], errors_needed: u32) -> bool {
+    let mut errors = 0;
+    for row in 0..first.len() {
+        for col in 0..first[0].len() {
+            if first[row][col] != second[row][col] {
+                errors += 1;
+            }
+        }
+    }
+
+    errors_needed == errors
+}
 
 #[cfg(test)]
 mod test {
@@ -105,11 +117,11 @@ mod test {
 
     #[test]
     fn case1() {
-        assert_eq!(part1(TEST_INPUT), 405);
+        assert_eq!(part1(TEST_INPUT, 0), 405);
     }
 
-    // #[test]
-    // fn case2() {
-    //     assert_eq!(part2(TEST_INPUT), 0);
-    // }
+    #[test]
+    fn case2() {
+        assert_eq!(part1(TEST_INPUT, 1), 400);
+    }
 }
