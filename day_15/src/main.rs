@@ -1,7 +1,7 @@
 fn main() {
     let input = include_str!("../input.txt");
     println!("Answer part1: {}", part1(input));
-    // println!("Answer part2: {}", part2(input));
+    println!("Answer part2: {}", part2(input));
 }
 
 fn hash(string: &str) -> u8 {
@@ -14,9 +14,70 @@ fn part1(input: &str) -> u32 {
     input.trim().split(',').map(|step| hash(step) as u32).sum()
 }
 
-// fn part2(input: &str) -> u32 {
-//     0
-// }
+#[derive(Debug)]
+struct Lens {
+    label: String,
+    focus: u8,
+}
+
+fn part2(input: &str) -> usize {
+    let mut boxes: [Vec<Lens>; 256] = std::array::from_fn(|_| Vec::new());
+    input.trim().split(',').for_each(|step| {
+        let pos = step
+            .chars()
+            .position(|ch| ch == '=' || ch == '-')
+            .expect("Should contain '=' or '-'!");
+        let (label, instruction) = step.split_at(pos);
+        let mut instruction = instruction.chars();
+        let label = label.to_string();
+        let lens_box = boxes.get_mut(hash(&label) as usize).unwrap();
+        match instruction.next().expect("Should not be empty!") {
+            '=' => {
+                let lens = Lens {
+                    label,
+                    focus: instruction
+                        .next()
+                        .expect("Should contain focus power!")
+                        .to_digit(10)
+                        .expect("Should be a ascii digit") as u8,
+                };
+                insert_lens(lens_box, lens);
+            }
+            '-' => remove_lens(lens_box, &label),
+            _ => unreachable!(),
+        }
+    });
+
+    get_total_focus_power(&boxes)
+}
+
+fn get_total_focus_power(boxes: &[Vec<Lens>; 256]) -> usize {
+    boxes
+        .iter()
+        .enumerate()
+        .map(|(i, lens_box)| {
+            (i + 1)
+                * lens_box
+                    .iter()
+                    .enumerate()
+                    .map(|(slot, lens)| (slot + 1) * lens.focus as usize)
+                    .sum::<usize>()
+        })
+        .sum()
+}
+
+fn insert_lens(lens_box: &mut Vec<Lens>, lens: Lens) {
+    match lens_box.iter_mut().find(|l| l.label == lens.label) {
+        Some(existing_lens) => *existing_lens = lens,
+        None => lens_box.push(lens),
+    };
+}
+
+fn remove_lens(lens_box: &mut Vec<Lens>, label: &str) {
+    if let Some(idx) = lens_box.iter().position(|l| l.label == label) {
+        lens_box.remove(idx);
+    };
+}
 
 #[cfg(test)]
 mod test {
@@ -34,8 +95,8 @@ mod test {
         assert_eq!(part1(TEST_INPUT), 1320);
     }
 
-    // #[test]
-    // fn case2() {
-    //     assert_eq!(part2(TEST_INPUT), 0);
-    // }
+    #[test]
+    fn case2() {
+        assert_eq!(part2(TEST_INPUT), 145);
+    }
 }
