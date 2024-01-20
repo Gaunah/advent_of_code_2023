@@ -36,7 +36,7 @@ fn part1(input: &str) -> usize {
 }
 
 fn sum_distance_of_galaxies(universe: &[Vec<char>]) -> usize {
-    let galaxies = find_all_galaxies(&universe);
+    let galaxies = find_all_galaxies(universe);
 
     let mut dist_sum = 0;
     for i in 0..galaxies.len() {

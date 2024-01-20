@@ -37,17 +37,17 @@ fn part1(input: &str, errors_needed: u32) -> usize {
     out.iter()
         .map(|block| {
             //find splitting row
-            let row = find_mirror_pos(&block, errors_needed);
+            let row = find_mirror_pos(block, errors_needed);
             let mut col = None;
-            if let None = row {
-                col = find_mirror_pos(&transpose(&block), errors_needed);
+            if row.is_none() {
+                col = find_mirror_pos(&transpose(block), errors_needed);
             }
 
             match (row, col) {
                 (None, Some(val)) => val,
                 (Some(val), None) => val * 100,
                 _ => {
-                    print_map(&block);
+                    print_map(block);
                     unreachable!()
                 }
             }

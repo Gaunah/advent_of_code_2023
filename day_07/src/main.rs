@@ -66,7 +66,7 @@ fn get_hand_type(hand: &Hand, joker: bool) -> u8 {
         process_joker(&mut card_counts);
     }
 
-    let mut values: Vec<_> = card_counts.values().into_iter().collect();
+    let mut values: Vec<_> = card_counts.values().collect();
     values.sort_unstable();
     match values.as_slice() {
         [1, 1, 1, 1, 1] => 0, // high card

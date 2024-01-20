@@ -15,7 +15,7 @@ fn slice_to_hashset(slice: &str) -> HashSet<u32> {
 
 fn parse_line(line: &str) -> (HashSet<u32>, HashSet<u32>) {
     let (_, line) = line.split_once(": ").unwrap();
-    let (win_line, my_line) = line.split_once("|").unwrap();
+    let (win_line, my_line) = line.split_once('|').unwrap();
     (slice_to_hashset(win_line), slice_to_hashset(my_line))
 }
 
