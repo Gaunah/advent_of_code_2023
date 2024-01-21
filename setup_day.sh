@@ -22,6 +22,8 @@ else
     if [ -f ./template_main.rs ]; then
         cp -v ./template_main.rs ./"${NAME}"/src/main.rs
     fi
+
+    cat ./release_profile >> ./"${NAME}"/Cargo.toml
 fi
 
 SESSION_COOKIE_FILE="./sessionCookie"

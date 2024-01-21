@@ -5,7 +5,7 @@ fn main() {
 }
 
 fn part1(input: &str) -> u32 {
-    0
+    todo!();
 }
 
 // fn part2(input: &str) -> u32 {
