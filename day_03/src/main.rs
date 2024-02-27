@@ -49,7 +49,7 @@ fn sum_part_numbers(window: [&str; 3], line_len: usize) -> u32 {
                 || contains_symbol(&mid[start..end])
                 || contains_symbol(&below[start..end])
             {
-                Some(cap[0].parse::<u32>().expect("Should be a positiv number!"))
+                Some(cap[0].parse::<u32>().expect("Should be a positive number!"))
             } else {
                 None
             }
@@ -87,7 +87,7 @@ fn sum_gear_ratios(window: [&str; 3], line_len: usize) -> u32 {
                             number
                                 .as_str()
                                 .parse()
-                                .expect("Should be a positiv number!"),
+                                .expect("Should be a positive number!"),
                         )
                     } else {
                         None

@@ -23,7 +23,7 @@ fn parse_input(input: &str) -> Vec<Hand> {
                 .next()
                 .expect("Should have second part!")
                 .parse()
-                .expect("Should be a positiv number!");
+                .expect("Should be a positive number!");
 
             Hand { cards, bid }
         })

@@ -33,7 +33,7 @@ fn part1(input: &str) -> u32 {
                 Some(
                     re_game.captures(line).expect("Should contain game ID!")["game_id"]
                         .parse::<u32>()
-                        .expect("Should be a positiv number!"),
+                        .expect("Should be a positive number!"),
                 )
             }
         })
@@ -42,7 +42,7 @@ fn part1(input: &str) -> u32 {
 
 fn is_any_over_max(re: &Regex, max: u32, line: &str) -> bool {
     re.captures_iter(line)
-        .any(|cap| cap[1].parse::<u32>().expect("Should be a positiv number!") > max)
+        .any(|cap| cap[1].parse::<u32>().expect("Should be a positive number!") > max)
 }
 
 fn part2(input: &str) -> u32 {
@@ -67,7 +67,7 @@ fn extract_max(re: &Regex, line: &str) -> u32 {
         .map(|cap| {
             cap[1]
                 .parse::<u32>()
-                .expect("Should always be a positiv number!")
+                .expect("Should always be a positive number!")
         })
         .max()
         .expect("Should not be empty!")

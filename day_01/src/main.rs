@@ -38,12 +38,12 @@ fn concat_first_and_last_digit(line: &str) -> u32 {
 
 #[test]
 fn case1() {
-    let intput = "1abc2\npqr3stu8vwx\na1b2c3d4e5f\ntreb7uchet";
-    assert_eq!(part1(intput), 142);
+    let input = "1abc2\npqr3stu8vwx\na1b2c3d4e5f\ntreb7uchet";
+    assert_eq!(part1(input), 142);
 }
 
 #[test]
 fn case2() {
-    let intput = "two1nine\neightwothree\nabcone2threexyz\nxtwone3four\n4nineeightseven2\nzoneight234\n7pqrstsixteen";
-    assert_eq!(part2(intput), 281);
+    let input = "two1nine\neightwothree\nabcone2threexyz\nxtwone3four\n4nineeightseven2\nzoneight234\n7pqrstsixteen";
+    assert_eq!(part2(input), 281);
 }
